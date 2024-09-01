@@ -1,14 +1,5 @@
-import { StyleSheet, Text, View } from 'react-native'
-import React from 'react'
-
-const Materi = () => {
-  return (
-    <View>
-      <Text>Materi</Text>
-    </View>
-  )
-}
-
-export default Materi
-
-const styles = StyleSheet.create({})
+import Main from "./Main";
+import Video from "./Video";
+import Soal from "./ContohSoal";
+import VideoPlayer from "./VideoPlayer";
+export {Main, Video, Soal, VideoPlayer}

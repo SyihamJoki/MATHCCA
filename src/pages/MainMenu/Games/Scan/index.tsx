@@ -1,14 +1,19 @@
-import { Alert, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { Alert, Dimensions, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import QRCodeScanner from 'react-native-qrcode-scanner';
 import { RNCamera } from 'react-native-camera';
-const validIds = ['2veJ4ksG0KnDbLLBzFpi', 'BpSnaS0SIO2REgDCFIS5'];
+import TextStyles from '../../../../assets/fonts';
+import Icon from 'react-native-vector-icons/Ionicons';
+import { AllGamesQuestion } from '../../../../data/data';
+const validIds = AllGamesQuestion.map(game => game.id);
+
 const Scan = ({route, navigation}) => {
   //const { user, onUpdate } = route.params;
   useEffect(() => {
     console.log('Scan component mounted'); // Log saat komponen dipasang
   }, []);
-
+  const windowWidth = Dimensions.get('window').width;
+  const windowHeight = Dimensions.get('window').height;
   const { user, onUpdate } = route.params;
   console.log("Scan",user, onUpdate)
   const onSuccess = (e) => {
@@ -34,16 +39,19 @@ const Scan = ({route, navigation}) => {
   return (
     <QRCodeScanner
       onRead={onSuccess}
-      topContent={<Text>Scan QR Code</Text>}
+      topViewStyle={{backgroundColor:'#c1393d', justifyContent:'center'}}
+      topContent={<Text style={[TextStyles.BerkshireSwash, {fontSize:18, color:'white'}]}>Scan QR Code</Text>}
       bottomContent={
         <View>
-          <TouchableOpacity onPress={toggleFlash} style={styles.flashButton}>
-            <Text style={{color:'black'}}>
-              {flashEnabled ? 'Turn off Flash' : 'Turn on Flash'}
-            </Text>
+          <TouchableOpacity onPress={toggleFlash} style={[{height:windowHeight*0.1, alignItems:'center'}]}>
+              <Icon name={flashEnabled ? 'flash' : 'flash-off'} size={25} color="black"/>
+              <Text style={[TextStyles.boldSmall,{color:'black'}]}>
+                {flashEnabled ? 'Matikan Flash' : 'Hdupkan Flash'}
+              </Text>
           </TouchableOpacity>
         </View>
       }
+      bottomViewStyle={{height:windowHeight*0.25, backgroundColor:'#c1393d'}}
       flashMode={flashEnabled ? RNCamera.Constants.FlashMode.torch : RNCamera.Constants.FlashMode.off}
       reactivate={true}
       reactivateTimeout={500}

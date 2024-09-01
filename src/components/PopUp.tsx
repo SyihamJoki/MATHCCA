@@ -14,6 +14,7 @@ const PopUp = ({visible, onClose}) => {
                 <Text style={[TextStyles.regular, {fontSize:18, color:"gray", textAlign:'left', marginStart:20}]}>2. Kerjakan semaksimal mungkin</Text>
                 <Text style={[TextStyles.regular, {fontSize:18, color:"gray", textAlign:'left', marginStart:20}]}>3. Kerjakan dengan jujur.</Text>
                 <Text style={[TextStyles.regular, {fontSize:18, color:"gray", textAlign:'left', marginStart:20}]}>4. Teliti Lebih dahulu pekerjaan kamu.</Text>
+                <Text style={[TextStyles.regular, {fontSize:18, color:"gray", textAlign:'left', marginStart:20}]}>5. Tanda "^"" merupakan tanda pangkat,{"\n    "} misalnya 1^2 (satu pangkat dua).</Text>
                 <TouchableOpacity onPress={onClose} style={[styles.closeButton, {width:windowWidth*0.8}]}>
                     <Text style={[TextStyles.bold,{ fontSize:15, color: "white" }]}>MULAI</Text>
                 </TouchableOpacity>

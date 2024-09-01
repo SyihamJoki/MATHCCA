@@ -1,14 +1,64 @@
 import { StyleSheet, Text, View, Dimensions, FlatList, TouchableOpacity, Image, ImageBackground, ScrollView } from 'react-native'
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import Container from '../../components/container'
 import Icon from 'react-native-vector-icons/FontAwesome5';
 import TextStyles from '../../assets/fonts';
 import { homeMenu } from '../../data/data';
+import AbiltyTestPopUp from '../../components/AbilityTestPopUp';
+import Sound from 'react-native-sound';
 
 const Home = ({user, onUpdate, navigation}) => {
   const windowWidth = Dimensions.get('window').width;
   const windowHeight = Dimensions.get('window').height;
-  
+  useEffect(() => {
+    if (user) {
+        handleLevelUpdate(user);
+    }
+  }, [user]);
+
+  const handleLevelUpdate = (updatedUser) => {
+      const score = Math.round((updatedUser.abilityTest / 15) * 100);
+      let tingkat = '';
+
+      if (score > 0 && score <= 50) {
+          tingkat = 'rendah';
+      } else if (score > 50 && score <= 80) {
+          tingkat = 'sedang';
+      } else if (score > 80 && score <= 100) {
+          tingkat = 'tinggi';
+      }else {
+        tingkat = ""
+      }
+      console.log("ting", tingkat)
+
+      let nextLevel = tingkat;
+
+      // Logika untuk kenaikan tingkatan
+      if (tingkat === "rendah" && updatedUser.exercise1 >= 6) {
+          if (updatedUser.exercise2 >= 3) {
+            nextLevel = "tinggi";
+          }
+          else{
+            nextLevel = "sedang";
+          }
+      } else if (tingkat === "sedang" && updatedUser.exercise2 >= 6) {
+          nextLevel = "tinggi";
+      }
+      console.log("next", nextLevel)
+
+      if (nextLevel !== updatedUser.tingkat) {
+          let finalUser = {
+              ...updatedUser,
+              tingkat: nextLevel,
+          };
+          onUpdate(finalUser);
+      }
+  };
+
+  const [isPopUpVisible, setPopUpVisible] = useState(true);
+  const handleClosePopUp = () => {
+    setPopUpVisible(false);
+  };
   const renderItem = ({ item }) => (
     <TouchableOpacity style={[styles.itemContainer, {width:windowWidth*0.45, height:windowWidth*0.45}]} onPress={() =>goToPage(item.page)}>
       <Image source={item.icon} style={{width:windowWidth*0.28, height:windowHeight*0.17}} resizeMode='contain' />
@@ -20,21 +70,41 @@ const Home = ({user, onUpdate, navigation}) => {
     <View style={styles.header}>
       <View style={{justifyContent:'flex-end'}}>
         <Text style={[TextStyles.bold, {fontSize:17, color:"white"}]}>Haloo, <Text style={[TextStyles.BerkshireSwash, {fontSize:17, color:"white"}]}>{user.fullName}</Text></Text>
-        <Text style={[TextStyles.regularSmall, {color:"white"}]}>Tingkat</Text>
+        {user.tingkat === "" ?
+          (<>
+            <AbiltyTestPopUp navigation={navigation} visible={isPopUpVisible} onClose={handleClosePopUp} onPress={() => goToPage("AbilityTest")}/>
+          </>)
+          :
+          (<Text style={[TextStyles.regularSmall, {color:"white"}]}>Tingkat {user.tingkat}</Text>)
+        }
       </View>
       <View style={{backgroundColor:'#4F2305', width:windowWidth*0.1, height:windowWidth*0.1, borderRadius:windowWidth*0.1, alignItems:'center', justifyContent:'center'}}>
         <Icon name="bell" solid color="#FF9E1F" size={20} />
       </View>
     </View>
   );
+  const sound = new Sound('button.mpeg', Sound.MAIN_BUNDLE, (error) => {
+    if (error) {
+      console.log('Failed to load the sound', error);
+      return;
+    }
+  });
   const goToPage = (item) => {
-    navigation.navigate(item, {
-      user,
-      onUpdate: (updatedUser) => {
-        onUpdate(updatedUser);
-      },
+    sound.play((success) => {
+      if (success) {
+        console.log('Sound played successfully');
+        navigation.navigate(item, {
+          user,
+          onUpdate: (updatedUser) => {
+            onUpdate(updatedUser);
+          },
+        });
+      } else {
+        console.log('Sound playback failed');
+      }
     });
   };
+  
   const ListFooterComponent = () => (
     <View style={{alignItems:'center', marginTop:20}}>
       <View style={{width:windowWidth*0.9, height:windowHeight*0.23, alignSelf:'center', marginTop:20}}>

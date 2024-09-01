@@ -42,6 +42,7 @@ const Register = ({navigation}) => {
         exercise1: 0,
         exercise2: 0,
         exercise3: 0,
+        pengayaan: 0,
         abilityTest: 0,
       });
   

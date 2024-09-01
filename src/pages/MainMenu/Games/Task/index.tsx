@@ -1,4 +1,4 @@
-import { Dimensions, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Dimensions, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import SweetAlert from 'react-native-sweet-alert';
 import ContainerWithHeader from '../../../../components/containerWithHeader';
@@ -70,43 +70,67 @@ const Task = ({ route, navigation }) => {
 
   return (
     <ContainerWithHeader title={"Games"}>
-      <PopUp visible={isPopUpVisible} onClose={handleClosePopUp} />
-      <View>
-        <View style={{ marginTop: windowWidth * 0.02 }}>
-          <View style={[styles.card, { width: windowWidth * 0.9, borderRadius: 10, marginBottom: windowHeight * 0.07, height: windowHeight * 0.2 }]}>
-            <Text style={[TextStyles.regularSmall, { color: "white" }]}>{question.question}</Text>
-          </View>
-          <View style={[styles.boxesContainer, { marginBottom: windowHeight * 0.02, width:windowWidth*0.9 }]}>
-            {question.choices.map((choice) => (
-              <TouchableOpacity
-                key={choice.id}
-                style={[
-                  styles.box,
-                  selectedAnswer === choice ? styles.selectedBox : null,
-                  { width: windowWidth * 0.42, height: windowWidth * 0.42 },
-                ]}
-                onPress={() => handleBoxPress(choice)}
-              >
-                <Text
-                  style={[
-                    styles.answer, TextStyles.boldSmall,
-                  ]}
-                >
-                  {choice.text}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-        </View>
-      </View>
-      <View style={styles.buttonContainer}>
-        <TouchableOpacity
-          style={[styles.button, { width: windowWidth * 0.25, height: windowHeight * 0.05 }]}
-          onPress={handleSave}
-        >
-          <Text style={[TextStyles.boldSmall, styles.buttonText]}>Simpan</Text>
-        </TouchableOpacity>
-      </View>
+            <PopUp visible={isPopUpVisible} onClose={handleClosePopUp} />
+            <View>
+                <View style={{ marginTop: windowWidth * 0.02 }}>
+                    {question && (
+                        <View style={[styles.card, { width: windowWidth * 0.8, borderRadius: 10, marginBottom: windowHeight * 0.02, height: windowHeight * 0.4 }]}>
+                            {question.questionImage && (
+                                <ScrollView horizontal style={{backgroundColor:'white', height:windowHeight*0.25}}>
+                                  <Image
+                                      source={question.questionImage}
+                                      style={{ width:windowWidth, height: windowHeight * 0.25, resizeMode:'contain'}}
+                                  />
+                                </ScrollView>
+                            )}
+                            {question.questionText && (
+                                <ScrollView style={{ maxHeight: question.questionImage ? windowHeight * 0.15 : windowHeight * 0.4 }}>
+                                  <Text style={[TextStyles.regularSmall, { color: 'white' }]}>
+                                      {question.questionText}
+                                  </Text>
+                                </ScrollView>
+                            )}
+                        </View>
+                    )}
+                    <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
+                        <View style={[styles.boxesContainer, { marginBottom: windowHeight * 0.02 }]}>
+                            {question && question.choices.map((choice) => (
+                                <TouchableOpacity
+                                    key={choice.id}
+                                    style={[
+                                        styles.box,
+                                        selectedAnswer === choice ? styles.selectedBox : null,
+                                        {
+                                            width: windowWidth * 0.8,
+                                            height: choice.image ? windowHeight * 0.3 : windowHeight * 0.1, // Adjust height based on image presence
+                                        },
+                                    ]}
+                                    onPress={() => handleBoxPress(choice)}
+                                >
+                                    {choice.image ? (
+                                        <Image
+                                            source={choice.image}
+                                            style={{ width: '100%', height: '100%', resizeMode: 'contain' }}
+                                        />
+                                    ) : (
+                                        <Text style={[styles.answer, TextStyles.boldSmall]}>
+                                            {choice.text}
+                                        </Text>
+                                    )}
+                                </TouchableOpacity>
+                            ))}
+                        </View>
+                        <View style={styles.buttonContainer}>
+                                <TouchableOpacity
+                                    style={[styles.button, { width: windowWidth * 0.25, height: windowHeight * 0.05 }]}
+                                    onPress={handleSave}
+                                >
+                                    <Text style={[TextStyles.boldSmall, styles.buttonText]}>Simpan</Text>
+                                </TouchableOpacity>
+                        </View>
+                    </ScrollView>
+                </View>
+            </View>
     </ContainerWithHeader>
   );
 }
@@ -129,21 +153,17 @@ const styles = StyleSheet.create({
   },
   card:{
       backgroundColor:'#4F2305',
-      padding:10,
-      alignSelf:'center'
+      padding:5
   },
   box:{
       backgroundColor:'white',
       marginBottom:10,
       borderRadius:10,
       padding:5,
-      justifyContent:'center',
-      alignItems:'center'
+      justifyContent:'center'
   },
-  boxesContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-around',
+  boxesContainer:{
+      marginTop:20,
   },
   answer:{
       color:'#4F2305'
@@ -167,4 +187,4 @@ const styles = StyleSheet.create({
   buttonText:{
       color:'black'
   }
-});
+})

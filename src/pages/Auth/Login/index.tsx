@@ -2,13 +2,14 @@ import { Dimensions, Image, StyleSheet, Text, TouchableOpacity, View } from 'rea
 import React, { useState } from 'react'
 import FormInput from '../../../components/forminput'
 import SweetAlert from 'react-native-sweet-alert';
-import { doc, collection, getDoc, getDocs, where, query } from 'firebase/firestore'
+import { doc, collection, getDoc, getDocs, where, query, setDoc } from 'firebase/firestore'
 import { FIREBASE_AUTH, FIRESTORE_DB } from '../../../hooks/firebase';
 import {signInWithEmailAndPassword} from "firebase/auth"
 import PasswordInput from '../../../components/passwordInput';
 import Container from '../../../components/container';
 import TextStyles from '../../../assets/fonts';
 import Loading from '../../../components/loading';
+import { calculateTingkat } from '../../../hooks/CalculateTingkat';
 
 const Login = ({navigation}) => {
   const initialUser = {}; // Initial user state
@@ -18,18 +19,33 @@ const Login = ({navigation}) => {
   const [password, setPassword] = useState('');
   const windowWidth = Dimensions.get('window').width;
   const windowHeight = Dimensions.get('window').height;
-  const onPasswordChange = (text) => {
-    setPassword(text); // Set the password in the state
-  };
   const [loading, setLoading] = useState(false);
   const auth = FIREBASE_AUTH;
   const firestore = FIRESTORE_DB;
+
+  const onPasswordChange = (text) => {
+    setPassword(text); // Set the password in the state
+  };
+
   const handleUserUpdate = (updatedUser) => {
     setUser(updatedUser); // Function to update user state
   };
+
+  const determineUserLevel = (abilityTestScore) => {
+    const score = Math.round((abilityTestScore / 15) * 100);
+    if (score >= 0 && score <= 50) {
+      return 'rendah';
+    } else if (score > 50 && score <= 80) {
+      return 'sedang';
+    } else if (score > 80 && score <= 100) {
+      return 'tinggi';
+    }else{
+      return ""
+    }
+  };
+
   const LoginPressed = async () => {
     if (!email || !password) {
-      // Validate if email or password is empty
       SweetAlert.showAlertWithOptions({
         title: 'Login Gagal',
         subTitle: 'Tolong lengkapi input email & password',
@@ -39,96 +55,64 @@ const Login = ({navigation}) => {
       });
       return;
     }
-  
+
     setLoading(true); // Assuming you have a setLoading function to handle loading state
-  
+
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
-      // Sign-in successful
       const user = userCredential.user;
-      console.log('User signed in:', user.uid);
-  
-      // Fetch the user data from Firestore
+
       const userDocRef = doc(firestore, 'users', user.uid);
       const userDocSnap = await getDoc(userDocRef);
+
       if (userDocSnap.exists()) {
         const userData = userDocSnap.data();
-        const username = userData.username;
-        handleUserUpdate({ ...userData });
-  
-        // Navigate to the Home screen or perform any other actions
+
+        // Tentukan tingkat berdasarkan nilai tes kemampuan
+        const tingkat = determineUserLevel(userData.abilityTest);
+        let nextLevel = tingkat;
+
+        // Logika untuk kenaikan tingkatan
+        if (tingkat === "rendah" && userData.exercise1 >= 6) {
+            nextLevel = "sedang";
+        } else if (tingkat === "sedang" && userData.exercise2 >= 6) {
+            nextLevel = "tinggi";
+        }
+        // Buat objek user yang diperbarui dengan tingkat (level)
+        const updatedUser = { ...userData, nextLevel };
+
+        handleUserUpdate(updatedUser);
+        
+        // Navigasi ke layar Home atau lakukan aksi lainnya
         navigation.reset({
           index: 0,
-          routes: [{ name: 'MainApp', params: { user: { ...userData } } }],
+          routes: [{ name: 'MainApp', params: { user: updatedUser } }],
         });
+
         SweetAlert.showAlertWithOptions({
           title: 'Login Berhasil',
-          subTitle: `Selamat datang, ${username}!`,
+          subTitle: `Selamat datang, ${userData.username}!`,
           confirmButtonTitle: 'OK',
           style: 'success',
           cancellable: false,
         });
       }
     } catch (error) {
-      // Handle sign-in error
       console.error('Sign-in error:', error.code, error.message);
-  
-      // Display an alert with the error message
-      if (error.code === 'auth/invalid-email') {
-        SweetAlert.showAlertWithOptions({
-          title: 'Login Gagal',
-          subTitle: 'Masukkan email dengan benar',
-          confirmButtonTitle: 'OK',
-          style: 'error',
-          cancellable: false,
-        });
-      } else if (error.code === 'auth/user-not-found') {
-        SweetAlert.showAlertWithOptions({
-          title: 'Login Gagal',
-          subTitle: 'Email anda belum terdaftar',
-          confirmButtonTitle: 'OK',
-          style: 'error',
-          cancellable: false,
-        });
-      } else if (error.code === 'Failed to get document because the client is offline.') {
-        SweetAlert.showAlertWithOptions({
-          title: 'Login Gagal',
-          subTitle: 'Coba ulangi lagi, masalah terdapat pada jaringan',
-          confirmButtonTitle: 'OK',
-          style: 'error',
-          cancellable: false,
-        });
-      } else if (error.code === 'auth/wrong-password') {
-        SweetAlert.showAlertWithOptions({
-          title: 'Login Gagal',
-          subTitle: 'Password Anda Salah!',
-          confirmButtonTitle: 'OK',
-          style: 'error',
-          cancellable: false,
-        });
-      } else if (error.code === 'auth/invalid-credential') {
-        SweetAlert.showAlertWithOptions({
-          title: 'Login Gagal',
-          subTitle: 'Periksa lagi email & passwordnya',
-          confirmButtonTitle: 'OK',
-          style: 'error',
-          cancellable: false,
-        });
-      } else {
-        SweetAlert.showAlertWithOptions({
-          title: 'Gagal',
-          subTitle: error.message,
-          confirmButtonTitle: 'OK',
-          style: 'error',
-          cancellable: false,
-        });
-      }
+
+      // Display appropriate error message based on error code
+      SweetAlert.showAlertWithOptions({
+        title: 'Login Gagal',
+        subTitle: error.message,
+        confirmButtonTitle: 'OK',
+        style: 'error',
+        cancellable: false,
+      });
     } finally {
       setLoading(false);
     }
   };
-  
-  
+
   return (
     <Container justifyContent={"center"}>
       <Loading visible={loading}/>
@@ -141,7 +125,7 @@ const Login = ({navigation}) => {
       <View>
         <FormInput value={email} setValue={setEmail} placeholder={"Masukkan Email"} keyboardType={"email"} />
         <PasswordInput onPasswordChange={onPasswordChange} />
-        <TouchableOpacity>
+        <TouchableOpacity onPress={()=>navigation.navigate('ForgotPassword')}>
           <Text style={[TextStyles.semiboldSmall,{color:'white'}]}>Lupa Password?</Text>
         </TouchableOpacity>
         <TouchableOpacity onPress={LoginPressed} style={[styles.button, {width:windowWidth*0.8, height:windowHeight*0.05, borderRadius:windowWidth*0.05, marginTop:15}]}>
@@ -159,6 +143,7 @@ const Login = ({navigation}) => {
     </Container>
   )
 }
+
 
 export default Login
 

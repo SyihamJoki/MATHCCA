@@ -20,7 +20,7 @@ const Result = ({route, navigation}) => {
         <View>
           <Text style={[TextStyles.bold,{color:"white", fontSize:18, textAlign:'center', marginBottom:10}]}>Nilai anda sebelumnya</Text>
           <ImageBackground source={require('../../../assets/image/bg-circle.png')} resizeMode='contain' style={{width:windowWidth*0.9, height:windowWidth*0.9, alignItems:'center', justifyContent:'center'}}>
-            <Text style={[TextStyles.bold, {fontSize:45, color:'#4F2305'}]}>{user.abilityTest*10}</Text>
+            <Text style={[TextStyles.bold, {fontSize:45, color:'#4F2305'}]}>{Math.round((user.abilityTest/15)*100)}</Text>
           </ImageBackground>
           <View style={{flexDirection:'row', width:windowWidth*0.82, alignSelf:'center', justifyContent:'space-between', marginTop: windowWidth*0.05}}>
             <View style={[styles.card, {width:windowWidth*0.4, height:windowHeight*0.12}]}>
@@ -33,7 +33,7 @@ const Result = ({route, navigation}) => {
               </View>
             </View>
             <View style={[styles.card, {width:windowWidth*0.4, height:windowHeight*0.12}]}>
-              <Text style={[TextStyles.bold, {color:'white', fontSize:24}]}>{10-user.abilityTest}</Text>
+              <Text style={[TextStyles.bold, {color:'white', fontSize:24}]}>{15-user.abilityTest}</Text>
               <View style={{flexDirection:'row', justifyContent:'center'}}>
                 <View style={{justifyContent:'center'}}>
                   <Icon name="circle" color="#FF0B0B" solid size={13}/>
@@ -44,9 +44,6 @@ const Result = ({route, navigation}) => {
           </View>
         </View>
         <View style={{position:'absolute', bottom:0, justifyContent:'center', alignItems:'center'}}>
-          <TouchableOpacity onPress={()=>navigation.replace('AbilityTest', {user:user, onUpdate:onUpdate})} style={[styles.button,{width:windowWidth*0.85, height:windowHeight*0.06, backgroundColor:'#4F2305'}]}>
-            <Text style={[TextStyles.boldSmall, {color:'#F9F9F9'}]}>Main Lagi</Text>
-          </TouchableOpacity>
           <TouchableOpacity
               onPress={() => {
                 navigation.goBack()

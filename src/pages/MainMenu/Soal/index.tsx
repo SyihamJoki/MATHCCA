@@ -1,14 +1,5 @@
-import { StyleSheet, Text, View } from 'react-native'
-import React from 'react'
-
-const Soal = () => {
-  return (
-    <View>
-      <Text>Soal</Text>
-    </View>
-  )
-}
-
-export default Soal
-
-const styles = StyleSheet.create({})
+import Main from "./Main";
+import Asesmen from "./Asesmen";
+import Latihan from "./Latihan";
+import HasilAsesmen from "./HasilAsesmen";
+export {Main, Asesmen, Latihan, HasilAsesmen}

@@ -28,7 +28,7 @@ const TextStyles = StyleSheet.create({
     fontSize: 24,
   },
   regularLarge: {
-    fontFamily:Font.font.bold,
+    fontFamily:Font.font.regular,
     fontSize: 24,
   },
   semibold: {
@@ -38,7 +38,7 @@ const TextStyles = StyleSheet.create({
     fontFamily: Font.font.semibold, // Ganti dengan nama font keluarga Anda
   },
   regular: {
-    fontFamily: Font.font.semibold, // Ganti dengan nama font keluarga Anda
+    fontFamily: Font.font.regular, // Ganti dengan nama font keluarga Anda
   },
   carubanRegular:{
     fontFamily: Font.font.caruban,
